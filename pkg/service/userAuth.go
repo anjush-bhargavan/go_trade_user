@@ -1,0 +1,209 @@
+package service
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/anjush-bhargavan/go_trade_user/config"
+	"github.com/anjush-bhargavan/go_trade_user/pkg/model"
+	pb "github.com/anjush-bhargavan/go_trade_user/pkg/proto"
+	"github.com/anjush-bhargavan/go_trade_user/utils"
+	"gorm.io/gorm"
+)
+
+// SignupService method receive the data in proto messages and start the verfification process.
+func (u *UserService) SignupService(p *pb.Signup) (*pb.Response, error) {
+	hashedPass, err := utils.HashPassword(p.Password)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in hashing password",
+		}, errors.New("unable to hash password")
+	}
+
+	user := &model.User{
+		UserName: p.User_Name,
+		Email:    p.Email,
+		Password: hashedPass,
+		Mobile:   p.Mobile,
+		ReferralCode: p.Referral_Code,
+	}
+
+	_, err = u.Repo.FindUserByEmail(user.Email)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "email already exists",
+		}, err
+	}
+
+	resp, err := u.twilio.SendTwilioOTP(p.Mobile)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in sending otp using twilio",
+		}, err
+	}
+
+	if resp.Status != nil {
+		fmt.Println(*resp.Status)
+	} else {
+		fmt.Println(resp.Status)
+	}
+
+	userData, err := json.Marshal(&user)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in marshaling data",
+		}, errors.New("error while marshaling data")
+	}
+
+	key := fmt.Sprintf("user_%v", p.Email)
+	err = u.redis.SetDataInRedis(key, userData, time.Minute*3)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in setting data in redis",
+		}, errors.New("error setting data in redis")
+	}
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: "Go to Verification page",
+	}, nil
+}
+
+// VerificationService handles the verification process and proceed with signup
+func (u *UserService) VerificationService(p *pb.OTP) (*pb.Response, error) {
+
+	key := fmt.Sprintf("user_%v", p.Email)
+
+	userData, err := u.redis.GetFromRedis(key)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in getting data from redis",
+		}, err
+	}
+
+	//Unmarshal the data from redis
+	var user model.User
+	err = json.Unmarshal([]byte(userData), &user)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in unmarshaling data",
+		}, err
+	}
+
+	 err = u.twilio.VerifyTwilioOTP(user.Mobile, p.OTP)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in verfying twilio otp",
+		}, err
+	}
+
+	referralCode := user.ReferralCode
+
+	newReferralCode := ""
+	for newReferralCode == "" {
+		code := utils.GenerateReferralCode(6)
+		_, err := u.Repo.FindReferralCode(code)
+		if err == gorm.ErrRecordNotFound {
+			newReferralCode = code
+		} else if err != nil {
+			return &pb.Response{
+				Status:  "Failed",
+				Message: "error in creating referralcode",
+			}, err
+		}
+	}
+	user.ReferralCode = newReferralCode
+
+	userID, err := u.Repo.CreateUser(&user)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in creating user in database",
+		}, errors.New("unable to create user")
+	}
+	if referralCode != "" {
+		referrer, err := u.Repo.FindReferralCode(referralCode)
+		if err != nil {
+			return &pb.Response{
+				Status:  "Failed",
+				Message: "Invalid referral code",
+			}, err
+		}
+		subject1 := fmt.Sprintf("Referral bonus for user: %d", userID)
+		transactionReferrer := model.Transaction{
+			UserID: referrer.ID,
+			Name:   subject1,
+			Amount: 100,
+		}
+		err = u.Repo.CreateTransaction(&transactionReferrer)
+		if err != nil {
+			return &pb.Response{
+				Status:  "Failed",
+				Message: "Error creating transaction",
+			}, err
+		}
+		subject2 := fmt.Sprintf("Referral bonus by user: %d", referrer.ID)
+		transactionReferral := model.Transaction{
+			UserID: userID,
+			Name:   subject2,
+			Amount: 100,
+		}
+		err = u.Repo.CreateTransaction(&transactionReferral)
+		if err != nil {
+			return &pb.Response{
+				Status:  "Failed",
+				Message: "Error creating transaction",
+			}, err
+		}
+	}
+
+	return &pb.Response{
+		Status:  "Success",
+		Message: "User created successfully",
+	}, nil
+}
+
+// LoginService handles the logging in of user it check the password and generate token
+func (u *UserService) LoginService(p *pb.Login) (*pb.Response, error) {
+	user, err := u.Repo.FindUserByEmail(p.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if !utils.CheckPassword(p.Password, user.Password) {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "password is incorrect",
+		}, errors.New("password incorrect")
+	}
+
+	if user.IsBlocked {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "user is blocked by admin",
+		}, errors.New("you are blocked by the admin")
+	}
+
+	jwtToken, err := utils.GenerateToken(config.LoadConfig().SECRETKEY, user.Email, user.ID)
+	if err != nil {
+		return &pb.Response{
+			Status:  "Failed",
+			Message: "error in generating token",
+		}, errors.New("error generating token")
+	}
+
+	return &pb.Response{
+		Status:  "success",
+		Message: fmt.Sprintf("Login successful\nToken : %v", jwtToken),
+	}, nil
+}
