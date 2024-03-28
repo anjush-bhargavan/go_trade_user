@@ -10,6 +10,7 @@ func (u *UserRepository) CreateTransaction(Transaction *model.Transaction) error
 	return nil
 }
 
+//FindTransactionByUserID will fetch the transactions by userID.
 func (u *UserRepository) FindTransactionByUserID(userID uint) (*[]model.Transaction,error) {
 	var Transaction []model.Transaction
 	if err := u.DB.Where("user_id = ?",userID).Find(&Transaction).Error; err != nil {

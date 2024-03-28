@@ -21,13 +21,14 @@ func (u *UserService) AddAddressService(p *pb.Address) (*pb.Response, error) {
 	err := u.Repo.CreateAddress(address)
 	if err != nil {
 		return &pb.Response{
-			Status:  "Failed",
+			Status:  pb.Response_ERROR,
 			Message: "Error adding address",
+			Payload: &pb.Response_Error{Error: err.Error()},
 		}, err
 	}
 
 	return &pb.Response{
-		Status:  "Success",
+		Status:  pb.Response_OK,
 		Message: "Address added successfully",
 	}, nil
 
@@ -60,16 +61,17 @@ func (u *UserService) EditAddressService(p *pb.Address) (*pb.Address, error) {
 // RemoveAddressService removes an address from database.
 func (u *UserService) RemoveAddressService(p *pb.IDs) (*pb.Response, error) {
 
-	err := u.Repo.RemoveAddress(uint(p.ID),uint(p.User_ID))
+	err := u.Repo.RemoveAddress(uint(p.ID), uint(p.User_ID))
 	if err != nil {
 		return &pb.Response{
-			Status:  "Failed",
+			Status:  pb.Response_ERROR,
 			Message: "Error deleting address",
+			Payload: &pb.Response_Error{Error: err.Error()},
 		}, err
 	}
 
 	return &pb.Response{
-		Status:  "Success",
+		Status:  pb.Response_OK,
 		Message: "Address removed successfully",
 	}, nil
 

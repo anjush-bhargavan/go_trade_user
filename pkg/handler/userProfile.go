@@ -33,3 +33,12 @@ func (u *UserHandler) ChangePassword(ctx context.Context,p *pb.Password) (*pb.Re
 	}
 	return response, nil
 }
+
+// BlockUser update the user as blocked in database 
+func (u *UserHandler) BlockUser(ctx context.Context, p *pb.ID) (*pb.Response, error) {
+	response, err := u.SVC.BlockUserService(p)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}

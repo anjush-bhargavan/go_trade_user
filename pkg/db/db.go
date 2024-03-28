@@ -31,6 +31,7 @@ func ConnectDB(config *config.Config) *gorm.DB {
 		&model.Address{},
 		&model.Seller{},
 		&model.Transaction{},
+		&model.Wathlist{},
 	)
 
 	if err != nil {

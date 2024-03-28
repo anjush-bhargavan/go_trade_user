@@ -41,7 +41,7 @@ func (t *TwilioService) SendTwilioOTP(phone string) (*verify.VerifyV2Verificatio
 //VerifyTwilioOTP will check the provided otp with the phone number as key.
 func (t *TwilioService) VerifyTwilioOTP(phone,otp string) error {
 	params := verify.CreateVerificationCheckParams{}
-	params.SetTo("+919656457407")
+	params.SetTo(t.Cfg.PHONE)
 	params.SetCode(otp)
 
 	resp,err := t.Client.VerifyV2.CreateVerificationCheck(t.Cfg.SERVICETOKEN,&params)

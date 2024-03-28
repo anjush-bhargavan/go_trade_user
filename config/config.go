@@ -16,6 +16,7 @@ type Config struct {
 	SID          string `mapstructure:"SID"`
 	TOKEN        string `mapstructure:"TOKEN"`
 	SERVICETOKEN string `mapstructure:"SERVICETOKEN"`
+	PHONE        string `mapstructure:"MOBILE"`
 	REDISHOST    string `mapstructure:"REDISHOST"`
 }
 

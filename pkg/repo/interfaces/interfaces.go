@@ -21,4 +21,8 @@ type UserRepoInter interface {
 	
 	CreateTransaction(Transaction *model.Transaction) error
 	FindTransactionByUserID(userID uint) (*[]model.Transaction,error)
+
+	CreateWatchlist(item *model.Wathlist) error
+	FetchWatchlist(userID uint) (*[]model.Wathlist,error)
+
 }
