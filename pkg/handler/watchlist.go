@@ -25,3 +25,11 @@ func (u *UserHandler) ViewWatchlist(ctx context.Context, p *pb.ID) (*pb.UserCate
 	return response, nil
 }
 
+// ViewWatchlist retrieves the categorie's watchlist.
+func (u *UserHandler) ViewWatchlistUsers(ctx context.Context,p *pb.ID) (*pb.UserList, error) {
+	response, err := u.SVC.FetchWatchlistByCategoryService(p)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}

@@ -10,10 +10,19 @@ func (u *UserRepository) CreateWatchlist(item *model.Wathlist) error {
 	return nil
 }
 
-// ViewWatchlist will fetch the watchlist of the user from database.
-func (u *UserRepository) FetchWatchlist(userID uint) (*[]model.Wathlist,error) {
+// FetchWatchlistByUser will fetch the watchlist of the user from database.
+func (u *UserRepository) FetchWatchlistByUser(userID uint) (*[]model.Wathlist,error) {
 	var watchlist []model.Wathlist
 	if err := u.DB.Where("user_id = ?",userID).Find(&watchlist).Error; err != nil {
+		return nil,err
+	}
+	return &watchlist,nil
+}
+
+// FetchWatchlistByCategory will fetch the watchlist of the category from database.
+func (u *UserRepository) FetchWatchlistByCategory(categoryID uint) (*[]model.Wathlist,error) {
+	var watchlist []model.Wathlist
+	if err := u.DB.Where("category_id = ?",categoryID).Find(&watchlist).Error; err != nil {
 		return nil,err
 	}
 	return &watchlist,nil

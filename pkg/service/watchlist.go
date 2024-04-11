@@ -34,7 +34,7 @@ func (u *UserService) AddWatchlistService(p *pb.IDs) (*pb.Response, error) {
 func (u *UserService) FetchWatchlistService(p *pb.ID) (*pb.UserCategoryList, error) {
 	ctx := context.Background()
 
-	items, err := u.Repo.FetchWatchlist(uint(p.ID))
+	items, err := u.Repo.FetchWatchlistByUser(uint(p.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -55,5 +55,37 @@ func (u *UserService) FetchWatchlistService(p *pb.ID) (*pb.UserCategoryList, err
 
 	return &pb.UserCategoryList{
 		Categories: categories,
+	}, nil
+}
+
+// FetchWatchlistByCategoryService handles the users to view their watchlist
+func (u *UserService) FetchWatchlistByCategoryService(p *pb.ID) (*pb.UserList, error) {
+
+	items, err := u.Repo.FetchWatchlistByCategory(uint(p.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	var users []*pb.Profile
+
+	for _, v := range *items {
+		result, err := u.Repo.FindUserByID(v.UserID)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &pb.Profile{
+			User_ID:  uint32(result.ID),
+			User_Name: result.UserName,
+			Email: result.Email,
+			Mobile:  result.Mobile,
+			Referral_Code: result.ReferralCode,
+			Wallet: float32(result.Wallet),
+			Is_Blocked:  result.IsBlocked,
+			Rejection_Count: uint32(result.RejecedOrders),
+		})
+	}
+
+	return &pb.UserList{
+		Users: users,
 	}, nil
 }

@@ -218,7 +218,7 @@ func (u *UserService) LoginService(p *pb.Login) (*pb.Response, error) {
 
 	return &pb.Response{
 		Status:  pb.Response_OK,
-		Message: fmt.Sprintf("Login successful"),
+		Message: "Login successful",
 		Payload: &pb.Response_Data{Data: jwtToken},
 	}, nil
 }

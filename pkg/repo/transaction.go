@@ -18,3 +18,12 @@ func (u *UserRepository) FindTransactionByUserID(userID uint) (*[]model.Transact
 	}
 	return &Transaction,nil
 }
+
+//FindAllTransactions will fetch the transactions.
+func (u *UserRepository) FindAllTransactions() (*[]model.Transaction,error) {
+	var Transaction []model.Transaction
+	if err := u.DB.Find(&Transaction).Error; err != nil {
+		return nil,err
+	}
+	return &Transaction,nil
+}

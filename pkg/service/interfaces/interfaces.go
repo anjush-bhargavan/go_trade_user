@@ -19,7 +19,7 @@ type UserServiceInter interface {
 	EditAddressService(p *pb.Address) (*pb.Address, error)
 	RemoveAddressService(p *pb.IDs) (*pb.Response, error)
 
-	CreateSellerService(p *pb.ID) (*pb.Response, error)
+	// CreateSellerService(p *pb.ID) (*pb.Response, error)
 	CreateProductService(p *pb.UserProduct) (*pb.Response,error)
 	EditProductService(p *pb.UserProduct) (*pb.UserProduct, error) 
 	RemoveProductService(p *pb.IDs) (*pb.Response, error)
@@ -33,7 +33,15 @@ type UserServiceInter interface {
 
 	AddWatchlistService(p *pb.IDs) (*pb.Response, error)
 	FetchWatchlistService(p *pb.ID) (*pb.UserCategoryList, error)
+	FetchWatchlistByCategoryService(p *pb.ID) (*pb.UserList, error)
 
 	AddBidService(p *pb.UserBid) (*pb.Response, error)
 	GetBidsService(p *pb.ID) (*pb.UserBidList, error)
+
+	CreateTransactionService(p *pb.Transaction) (*pb.Response, error)
+	FindTransactionsService(p *pb.ID) (*pb.TransactionList, error)
+	FindAllTransactionsService(p *pb.NoParam) (*pb.TransactionList, error)
+
+	UserPaymentService(p *pb.UserBid) (*pb.UserPaymentResponse, error)
+	UserPaymentSuccessService(p *pb.UserPayment) (*pb.Response, error)
 }

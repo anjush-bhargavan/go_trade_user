@@ -44,7 +44,6 @@ func (u *UserService) GetBidsService(p *pb.ID) (*pb.UserBidList, error) {
 
 	for _,bid := range result.Bids {
 		bids =append(bids, &pb.UserBid{
-			Bid_ID:  bid.Bid_ID,
 			User_ID: bid.User_ID,
 			Product_ID: bid.Product_ID,
 			Amount: bid.Amount,

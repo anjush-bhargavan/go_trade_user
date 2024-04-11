@@ -15,14 +15,15 @@ type UserRepoInter interface {
 	FindAddressByUser(userID uint) (*model.Address, error)
 	RemoveAddress(addressID,userID uint) error
 
-	CreateSeller(seller *model.Seller) error
-	FindSeller(sellerID uint) (*model.Seller,error)
-	FindSellerByUserID(userID uint) (*model.Seller,error)
+	// CreateSeller(seller *model.Seller) error
+	// FindSeller(sellerID uint) (*model.Seller,error)
+	// FindSellerByUserID(userID uint) (*model.Seller,error)
 	
 	CreateTransaction(Transaction *model.Transaction) error
 	FindTransactionByUserID(userID uint) (*[]model.Transaction,error)
+	FindAllTransactions() (*[]model.Transaction,error)
 
 	CreateWatchlist(item *model.Wathlist) error
-	FetchWatchlist(userID uint) (*[]model.Wathlist,error)
-
+	FetchWatchlistByUser(userID uint) (*[]model.Wathlist,error)
+	FetchWatchlistByCategory(categoryID uint) (*[]model.Wathlist,error)
 }
