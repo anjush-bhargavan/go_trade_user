@@ -5,41 +5,13 @@ import (
 	"errors"
 
 	productpb "github.com/anjush-bhargavan/go_trade_user/pkg/clients/product/pb"
-	// "github.com/anjush-bhargavan/go_trade_user/pkg/model"
 	pb "github.com/anjush-bhargavan/go_trade_user/pkg/proto"
 )
 
-// func (u *UserService) CreateSellerService(p *pb.ID) (*pb.Response, error) {
-// 	seller := model.Seller{
-// 		UserID: uint(p.ID),
-// 	}
-
-// 	err := u.Repo.CreateSeller(&seller)
-// 	if err != nil {
-// 		return &pb.Response{
-// 			Status:  pb.Response_ERROR,
-// 			Message: "Failed to create seller",
-// 			Payload: &pb.Response_Error{Error: err.Error()},
-// 		}, err
-// 	}
-
-// 	return &pb.Response{
-// 		Status:  pb.Response_OK,
-// 		Message: "Seller created successfully",
-// 	}, nil
-// }
 
 func (u *UserService) CreateProductService(p *pb.UserProduct) (*pb.Response, error) {
 	ctx := context.Background()
 
-	// seller, err := u.Repo.FindSellerByUserID(uint(p.Seller_ID))
-	// if err != nil {
-	// 	return &pb.Response{
-	// 		Status:  pb.Response_ERROR,
-	// 		Message: "user is not registered as a seller",
-	// 		Payload: &pb.Response_Error{Error: err.Error()},
-	// 	}, err
-	// }
 
 	product := &productpb.Product{
 		Name:      p.Name,

@@ -18,7 +18,7 @@ func Init() {
 
 	redis, err := config.SetupRedis(cnfg)
 	if err != nil {
-		log.Fatalf("failed to connect to redis")
+		log.Fatalf("failed to connect to redis" )
 	}
 
 	twilio := config.SetupTwilio(cnfg)

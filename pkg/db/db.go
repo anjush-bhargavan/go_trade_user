@@ -29,7 +29,6 @@ func ConnectDB(config *config.Config) *gorm.DB {
 	err = DB.AutoMigrate(
 		&model.User{},
 		&model.Address{},
-		&model.Seller{},
 		&model.Transaction{},
 		&model.Wathlist{},
 	)

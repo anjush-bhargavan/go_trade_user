@@ -10,7 +10,7 @@ import (
 )
 
 // NewGrpcUserServer creates a new gRPC server for user-related operations.
-func NewGrpcUserServer(port string, handlr *handler.UserHandler) error {
+func NewGrpcUserServer(port string, handlr *handler.UserHandler)  error {
 	log.Println("connecting to gRPC server")
 	addr := fmt.Sprintf(":%s",port)
 	lis, err := net.Listen("tcp",addr)
